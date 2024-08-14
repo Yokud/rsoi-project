@@ -13,6 +13,13 @@ services:
       - ./postgres/:/docker-entrypoint-initdb.d/
     ports:
       - "5432:5432"
+    networks:
+      - db-local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.2
@@ -40,7 +47,90 @@ services:
     depends_on:
       - zookeeper
 
-# TODO добавить сервисы
+  gateway:
+    image: ${DOCKER_REGISTRY-}dslab3gateway
+    container_name: gateway
+    build:
+      context: ./src/DS_Lab3.GateWay/
+      dockerfile: Dockerfile
+    depends_on:
+      - rentals
+      - cars
+      - payments
+    networks:
+      - cars-local
+      - rentals-local
+      - payments-local
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/manage/health"]
+      interval: 5s
+      timeout: 10s
+
+  cars:
+    image: ${DOCKER_REGISTRY-}dslab3cars
+    container_name: cars
+    build:
+      context: ./src/DS_Lab3.Cars/
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - cars-local
+      - db-local
+    ports:
+      - "8070:8070"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8070/manage/health"]
+      interval: 5s
+      timeout: 10s
+
+  rentals:
+    image: ${DOCKER_REGISTRY-}dslab3rentals
+    container_name: rentals
+    build:
+      context: ./src/DS_Lab3.Rental/
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rentals-local
+      - db-local
+    ports:
+      - "8060:8060"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8060/manage/health"]
+      interval: 5s
+      timeout: 10s
+
+  payments:
+    image: ${DOCKER_REGISTRY-}dslab3payments
+    container_name: payments
+    build:
+      context: ./src/DS_Lab3.Payment/
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - payments-local
+      - db-local
+    ports:
+      - "8050:8050"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8050/manage/health"]
+      interval: 5s
+      timeout: 10s
 
 volumes:
   db-data:
+  
+networks:
+  cars-local:
+  rentals-local:
+  payments-local:
+  db-local:
+    driver: bridge

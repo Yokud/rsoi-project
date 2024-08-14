@@ -1,0 +1,10 @@
+﻿namespace DS_Project.GateWay
+{
+    public class CreatePaidRentalRequest
+    {
+        public Guid CarUid { get; set; }
+        public DateTime DateFrom { get; set; }
+        public DateTime DateTo { get; set; }
+        public Guid PaymentUid { get; set; }
+    }
+}
