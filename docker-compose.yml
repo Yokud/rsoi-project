@@ -48,10 +48,10 @@ services:
       - zookeeper
 
   gateway:
-    image: ${DOCKER_REGISTRY-}dslab3gateway
+    image: ${DOCKER_REGISTRY-}dsprojectgateway
     container_name: gateway
     build:
-      context: ./src/DS_Lab3.GateWay/
+      context: ./src/DS_Project.GateWay/
       dockerfile: Dockerfile
     depends_on:
       - rentals
@@ -69,10 +69,10 @@ services:
       timeout: 10s
 
   cars:
-    image: ${DOCKER_REGISTRY-}dslab3cars
+    image: ${DOCKER_REGISTRY-}dsprojectcars
     container_name: cars
     build:
-      context: ./src/DS_Lab3.Cars/
+      context: ./src/DS_Project.Cars/
       dockerfile: Dockerfile
     depends_on:
       postgres:
@@ -88,10 +88,10 @@ services:
       timeout: 10s
 
   rentals:
-    image: ${DOCKER_REGISTRY-}dslab3rentals
+    image: ${DOCKER_REGISTRY-}dsprojectrentals
     container_name: rentals
     build:
-      context: ./src/DS_Lab3.Rental/
+      context: ./src/DS_Project.Rental/
       dockerfile: Dockerfile
     depends_on:
       postgres:
@@ -107,10 +107,10 @@ services:
       timeout: 10s
 
   payments:
-    image: ${DOCKER_REGISTRY-}dslab3payments
+    image: ${DOCKER_REGISTRY-}dsprojectpayments
     container_name: payments
     build:
-      context: ./src/DS_Lab3.Payment/
+      context: ./src/DS_Project.Payment/
       dockerfile: Dockerfile
     depends_on:
       postgres:
