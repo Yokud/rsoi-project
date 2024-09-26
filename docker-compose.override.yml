@@ -31,4 +31,12 @@ services:
       - ASPNETCORE_URLS=http://+:8050
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Http:/root/.aspnet/http:ro  
+      - ${APPDATA}/ASP.NET/Http:/root/.aspnet/http:ro
+
+  auth:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8040
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Http:/root/.aspnet/http:ro

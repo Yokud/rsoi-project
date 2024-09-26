@@ -125,6 +125,25 @@ services:
       interval: 5s
       timeout: 10s
 
+  auth:
+    image: ${DOCKER_REGISTRY-}dsprojectauth
+    container_name: auth
+    build:
+      context: ./src/DS_Project.Auth/
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth-local
+      - db-local
+    ports:
+      - "8040:8040"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8040/manage/health"]
+      interval: 5s
+      timeout: 10s
+
 volumes:
   db-data:
   
@@ -132,5 +151,6 @@ networks:
   cars-local:
   rentals-local:
   payments-local:
+  auth-local:
   db-local:
     driver: bridge

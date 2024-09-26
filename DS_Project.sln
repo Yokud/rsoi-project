@@ -16,6 +16,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DS_Project.Payment", "src\D
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{F5ECBDA5-EAC6-4DF2-B4EB-68A042833799}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DS_Project.Auth", "src\DS_Project.Auth\DS_Project.Auth.csproj", "{B4C2A72B-9C33-4187-A4C1-4156CA20200D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{F5ECBDA5-EAC6-4DF2-B4EB-68A042833799}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5ECBDA5-EAC6-4DF2-B4EB-68A042833799}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5ECBDA5-EAC6-4DF2-B4EB-68A042833799}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4C2A72B-9C33-4187-A4C1-4156CA20200D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4C2A72B-9C33-4187-A4C1-4156CA20200D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4C2A72B-9C33-4187-A4C1-4156CA20200D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4C2A72B-9C33-4187-A4C1-4156CA20200D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
