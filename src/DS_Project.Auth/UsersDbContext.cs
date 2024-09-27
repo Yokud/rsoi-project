@@ -10,6 +10,22 @@ namespace DS_Project.Auth
         public UsersDbContext(DbContextOptions<UsersDbContext> options) : base(options)
         {
             Database.EnsureCreated();
+
+            if (Users is not null && !Users.Any())
+            {
+                Users.Add(new User()
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = "admin",
+                    Password = "admin",
+                    FirstName = "admin",
+                    LastName = "admin",
+                    Email = "admin@mail.com",
+                    PhoneNumber = "88005553535",
+                    Role = UserRole.Admin.GetRoleNameString(),
+                });
+                SaveChanges();
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -26,7 +42,7 @@ namespace DS_Project.Auth
 
                 entity.Property(x => x.UserName).HasMaxLength(128).HasColumnName("username");
 
-                entity.Property(x => x.Password).HasColumnName("password_hash");
+                entity.Property(x => x.Password).HasColumnName("password");
 
                 entity.Property(x => x.PhoneNumber).HasColumnName("phone_number");
 

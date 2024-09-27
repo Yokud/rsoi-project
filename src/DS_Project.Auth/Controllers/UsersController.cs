@@ -6,14 +6,9 @@ namespace DS_Project.Auth.Controllers
 {
     [ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class UsersController : Controller
+    public class UsersController(IUsersService usersService) : Controller
     {
-        readonly IUsersService _usersService;
-
-        public UsersController(IUsersService usersService)
-        {
-            _usersService = usersService;
-        }
+        readonly IUsersService _usersService = usersService;
 
         [HttpPost]
         [Route("login")]
