@@ -3,6 +3,7 @@ using DS_Project.GateWay.DTO;
 using DS_Project.GateWay.Services;
 using DS_Project.GateWay.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 
 namespace DS_Project.GateWay.Controllers
@@ -44,7 +45,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpGet("rental")]
-        public async Task<IActionResult> GetUserRentals([FromHeader(Name = "X-User-Name")] string xUserName)
+        public async Task<IActionResult> GetUserRentals([FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
             var rentalServiceHealth = await HealthCheckAsync("rentals:8060");
 
@@ -59,12 +60,15 @@ namespace DS_Project.GateWay.Controllers
             }
 
             using var rentalsReq = new HttpRequestMessage(HttpMethod.Get, "http://rentals:8060/rental");
-            rentalsReq.Headers.Add("X-User-Name", xUserName);
+            rentalsReq.Headers.Add("scopeToken", scopeToken);
             using var rentalsRes = await _httpClient.SendAsync(rentalsReq);
+            if (rentalsRes.StatusCode == HttpStatusCode.Unauthorized)
+                return Unauthorized();
+
             var rentals = await rentalsRes.Content.ReadFromJsonAsync<IEnumerable<Rental>>();
 
             if (rentals is null || !rentals.Any())
-                return NotFound($"User {xUserName} has no rentals");
+                return NotFound($"User with token = {scopeToken} has no rentals");
 
             var responses = new List<RentalResponse>(rentals.Count());
                 
@@ -91,7 +95,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpGet("rental/{rentalUid}")]
-        public async Task<IActionResult> GetUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "X-User-Name")] string xUserName)
+        public async Task<IActionResult> GetUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
             var rentalServiceHealth = await HealthCheckAsync("rentals:8060");
 
@@ -106,12 +110,15 @@ namespace DS_Project.GateWay.Controllers
             }
 
             using var rentalsReq = new HttpRequestMessage(HttpMethod.Get, $"http://rentals:8060/rental/{rentalUid}");
-            rentalsReq.Headers.Add("X-User-Name", xUserName);
+            rentalsReq.Headers.Add("scopeToken", scopeToken);
             using var rentalsRes = await _httpClient.SendAsync(rentalsReq);
+            if (rentalsRes.StatusCode == HttpStatusCode.Unauthorized)
+                return Unauthorized();
+
             var rental = await rentalsRes.Content.ReadFromJsonAsync<Rental>();
 
             if (rental is null)
-                return NotFound($"User {xUserName} has no rental with UUID = {rentalUid}");
+                return NotFound($"User with token = {scopeToken} has no rental with UUID = {rentalUid}");
 
             object? car;
             var carsServiceHealth = await HealthCheckAsync("cars:8070");
@@ -133,7 +140,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpPost("rental")]
-        public async Task<IActionResult> RentCar([FromHeader(Name = "X-User-Name")] string xUserName, [FromBody] CreateRentalRequest request)
+        public async Task<IActionResult> RentCar([FromHeader(Name = "scopeToken"), Required] string scopeToken, [FromBody] CreateRentalRequest request)
         {
             var carsServiceHealth = await HealthCheckAsync("cars:8070");
 
@@ -152,6 +159,7 @@ namespace DS_Project.GateWay.Controllers
 
             if (carRes is null || carRes.StatusCode == HttpStatusCode.NotFound)
                 return BadRequest();
+
 
             var priceReq = new HttpRequestMessage(HttpMethod.Get, $"http://cars:8070/cars/{request.CarUid}/price");
             var priceRes = await _httpClient.SendAsync(priceReq);
@@ -183,7 +191,7 @@ namespace DS_Project.GateWay.Controllers
             try
             {
                 using var rentalReq = new HttpRequestMessage(HttpMethod.Post, $"http://rentals:8060/rental");
-                rentalReq.Headers.Add("X-User-Name", xUserName);
+                rentalReq.Headers.Add("scopeToken", scopeToken);
                 rentalReq.Content = JsonContent.Create(createRentalReqBody, typeof(CreatePaidRentalRequest));
                 using var rentalRes = await _httpClient.SendAsync(rentalReq);
                 if (!rentalRes.IsSuccessStatusCode)
@@ -201,6 +209,9 @@ namespace DS_Project.GateWay.Controllers
                     Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
                     return new ObjectResult(resp);
                 }
+
+                if (rentalRes.StatusCode == HttpStatusCode.Unauthorized)
+                    return Unauthorized();
 
                 var rentalResponse = await rentalRes.Content.ReadFromJsonAsync<Rental>();
 
@@ -224,7 +235,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpDelete("rental/{rentalUid}")]
-        public async Task<IActionResult> CancelUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "X-User-Name")] string xUserName)
+        public async Task<IActionResult> CancelUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
             var rentalServiceHealth = await HealthCheckAsync("rentals:8060");
 
@@ -239,12 +250,15 @@ namespace DS_Project.GateWay.Controllers
             }
 
             using var rentalsReq = new HttpRequestMessage(HttpMethod.Get, $"http://rentals:8060/rental/{rentalUid}");
-            rentalsReq.Headers.Add("X-User-Name", xUserName);
+            rentalsReq.Headers.Add("scopeToken", scopeToken);
             using var rentalsRes = await _httpClient.SendAsync(rentalsReq);
+            if (rentalsRes.StatusCode == HttpStatusCode.Unauthorized)
+                return Unauthorized();
+
             var rental = await rentalsRes.Content.ReadFromJsonAsync<Rental>();
 
             if (rental is null)
-                return NotFound($"User {xUserName} has no rental with UUID = {rentalUid}");
+                return NotFound($"User with token = {scopeToken} has no rental with UUID = {rentalUid}");
 
             using var carReq = new HttpRequestMessage(HttpMethod.Get, $"http://cars:8070/cars/{rental.CarUid}/undo_rent");
             using var carRes = await _httpClient.SendAsync(carReq);
@@ -253,7 +267,7 @@ namespace DS_Project.GateWay.Controllers
                 return NotFound();
 
             using var rentalsCancelReq = new HttpRequestMessage(HttpMethod.Delete, $"http://rentals:8060/rental/{rentalUid}");
-            rentalsCancelReq.Headers.Add("X-User-Name", xUserName);
+            rentalsCancelReq.Headers.Add("scopeToken", scopeToken);
             try
             {
                 using var rentalsCancelRes = await _httpClient.SendAsync(rentalsCancelReq);
@@ -290,7 +304,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpPost("rental/{rentalUid}/finish")]
-        public async Task<IActionResult> FinishUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "X-User-Name")] string xUserName)
+        public async Task<IActionResult> FinishUserRental([FromRoute] Guid rentalUid, [FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
             var rentalServiceHealth = await HealthCheckAsync("rentals:8060");
 
@@ -305,19 +319,22 @@ namespace DS_Project.GateWay.Controllers
             }
 
             using var rentalsReq = new HttpRequestMessage(HttpMethod.Get, $"http://rentals:8060/rental/{rentalUid}");
-            rentalsReq.Headers.Add("X-User-Name", xUserName);
+            rentalsReq.Headers.Add("scopeToken", scopeToken);
             using var rentalsRes = await _httpClient.SendAsync(rentalsReq);
+            if (rentalsRes.StatusCode == HttpStatusCode.Unauthorized)
+                return Unauthorized();
+
             var rental = await rentalsRes.Content.ReadFromJsonAsync<Rental>();
 
             if (rental is null)
-                return NotFound($"User {xUserName} has no rental with UUID = {rentalUid}");
+                return NotFound($"User with token = {scopeToken} has no rental with UUID = {rentalUid}");
 
             using var carReq = new HttpRequestMessage(HttpMethod.Get, $"http://cars:8070/cars/{rental.CarUid}/undo_rent");
             using var carRes = await _httpClient.SendAsync(carReq);
             carRes.EnsureSuccessStatusCode();
 
             using var rentalsFinishReq = new HttpRequestMessage(HttpMethod.Post, $"http://rentals:8060/rental/{rentalUid}/finish");
-            rentalsFinishReq.Headers.Add("X-User-Name", xUserName);
+            rentalsFinishReq.Headers.Add("scopeToken", scopeToken);
 
             try
             {
@@ -396,7 +413,7 @@ namespace DS_Project.GateWay.Controllers
         }
 
         [HttpGet("statistics")]
-        public async Task<IActionResult> GetStatistics()
+        public async Task<IActionResult> GetStatistics([FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
             var statServiceHealth = await HealthCheckAsync("statistics:8030");
 
