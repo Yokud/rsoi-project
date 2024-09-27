@@ -12,7 +12,7 @@ namespace DS_Project.Payments.Service
             _payments = payments;
         }
 
-        public async Task<Guid?> CreateAsync(Payment payment)
+        public async Task<Guid?> CreateAsync(Entity.Payment payment)
         {
             await _payments.CreateAsync(payment);
             await _payments.SaveAsync();
@@ -20,17 +20,17 @@ namespace DS_Project.Payments.Service
             return payment?.PaymentUid;
         }
 
-        public async Task<IEnumerable<Payment>> GetAllAsync()
+        public async Task<IEnumerable<Entity.Payment>> GetAllAsync()
         {
             return await _payments.GetAllAsync();
         }
 
-        public async Task<Payment?> GetAsync(Guid guid)
+        public async Task<Entity.Payment?> GetAsync(Guid guid)
         {
             return await _payments.GetAsync(guid);
         }
 
-        public async Task Update(Payment payment)
+        public async Task Update(Entity.Payment payment)
         {
             await _payments.Update(payment);
             await _payments.SaveAsync();

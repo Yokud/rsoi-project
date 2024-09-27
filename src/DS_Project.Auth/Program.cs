@@ -18,6 +18,7 @@ builder.Services.AddDbContext<UsersDbContext>(opt =>
 
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddSingleton<LogsProducer>();
 
 builder.Services.Configure<JwtConfiguration>(config.GetSection("JwtConfiguration"));
 builder.Services.Configure<GatewaySecret>(config.GetSection("GatewaySecret"));

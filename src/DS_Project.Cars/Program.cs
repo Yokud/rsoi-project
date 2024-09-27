@@ -17,6 +17,7 @@ builder.Services.AddDbContext<CarsDbContext>(opt =>
 
 builder.Services.AddScoped<ICarsRepository, CarsRepository>();
 builder.Services.AddScoped<ICarsService, CarsService>();
+builder.Services.AddSingleton<LogsProducer>();
 
 builder.Services.AddHealthChecks();
 

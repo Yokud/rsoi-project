@@ -4,10 +4,10 @@ namespace DS_Project.Payments.Repository
 {
     public interface IPaymentRepository
     {
-        Task<IEnumerable<Payment>> GetAllAsync();
-        Task<Payment?> GetAsync(Guid guid);
-        Task CreateAsync(Payment payment);
-        Task Update(Payment payment);
+        Task<IEnumerable<Entity.Payment>> GetAllAsync();
+        Task<Entity.Payment?> GetAsync(Guid guid);
+        Task CreateAsync(Entity.Payment payment);
+        Task Update(Entity.Payment payment);
         Task SaveAsync();
     }
 }

@@ -18,6 +18,8 @@ builder.Services.AddDbContext<PaymentsDbContext>(opt =>
 
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddSingleton<LogsProducer>();
+
 builder.Services.AddHealthChecks();
 builder.Services.AddCors();
 

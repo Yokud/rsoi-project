@@ -12,17 +12,17 @@ namespace DS_Project.Payments.Repository
             _context = context;
         }
 
-        public async Task CreateAsync(Payment payment)
+        public async Task CreateAsync(Entity.Payment payment)
         {
             await _context.Payments.AddAsync(payment);
         }
 
-        public async Task<IEnumerable<Payment>> GetAllAsync()
+        public async Task<IEnumerable<Entity.Payment>> GetAllAsync()
         {
             return await _context.Payments.ToListAsync();
         }
 
-        public async Task<Payment?> GetAsync(Guid guid)
+        public async Task<Entity.Payment?> GetAsync(Guid guid)
         {
             return await _context.Payments.FirstOrDefaultAsync(c => c.PaymentUid == guid);
         }
@@ -32,7 +32,7 @@ namespace DS_Project.Payments.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task Update(Payment payment)
+        public async Task Update(Entity.Payment payment)
         {
             var item = await GetAsync(payment.PaymentUid);
 

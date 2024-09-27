@@ -354,19 +354,84 @@ namespace DS_Project.GateWay.Controllers
                 return new ObjectResult(resp);
             }
 
-            var loginReq = new HttpRequestMessage(HttpMethod.Post, "http://auth:8040/login")
+            using var loginReq = new HttpRequestMessage(HttpMethod.Post, "http://auth:8040/login")
             {
                 Content = JsonContent.Create(loginRequest)
             };
 
-            var tokenResp = await _httpClient.SendAsync(loginReq);
+            using var tokenResp = await _httpClient.SendAsync(loginReq);
 
             if (!tokenResp.IsSuccessStatusCode)
-                return NotFound();
+                return Unauthorized();
 
             var token = await tokenResp.Content.ReadFromJsonAsync<JwtToken>();
 
             return Ok(token);
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] UserCreateRequest registerRequest)
+        {
+            var authServiceHealth = await HealthCheckAsync("auth:8040");
+
+            if (!authServiceHealth)
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Auth Service unavailable",
+                };
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+
+            using var regReq = new HttpRequestMessage(HttpMethod.Post, "http://auth:8040/register")
+            {
+                Content = JsonContent.Create(registerRequest)
+            };
+
+            using var newIdResp = await _httpClient.SendAsync(regReq);
+            var newId = newIdResp.Content.ReadFromJsonAsync<Guid>();
+
+            return Ok(newId);
+        }
+
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetStatistics()
+        {
+            var statServiceHealth = await HealthCheckAsync("statistics:8030");
+
+            if (!statServiceHealth)
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Statistics Service unavailable",
+                };
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+
+            using var getRequest = new HttpRequestMessage(HttpMethod.Get, $"http://statistics:8030/statistics/get");
+
+            try
+            {
+                using var getResponse = await _httpClient.SendAsync(getRequest);
+
+                if (!getResponse.IsSuccessStatusCode)
+                {
+                    var reqClone = await HttpRequestMessageHelper.CloneHttpRequestMessageAsync(getRequest);
+                    _requestQueueService.AddRequestToQueue(reqClone);
+                    return NoContent();
+                }
+
+                var resultList = await getResponse.Content.ReadFromJsonAsync<IEnumerable<string>>();
+                return Ok(resultList);
+            }
+            catch (HttpRequestException e)
+            {
+                var reqClone = await HttpRequestMessageHelper.CloneHttpRequestMessageAsync(getRequest);
+                _requestQueueService.AddRequestToQueue(reqClone);
+                return NoContent();
+            }
         }
 
         async Task<bool> HealthCheckAsync(string base_adress)

@@ -8,7 +8,10 @@
         "cars": "StartDebugging",
         "rentals": "StartDebugging",
         "payments": "StartDebugging",
-        "auth": "StartDebugging"
+        "auth": "StartDebugging",
+        "statistics": "StartDebugging",
+        "broker-kafka": "StartWithoutDebugging",
+        "zookeeper": "StartWithoutDebugging"
       }
     }
   }

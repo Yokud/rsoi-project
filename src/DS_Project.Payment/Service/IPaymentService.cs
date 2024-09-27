@@ -4,9 +4,9 @@ namespace DS_Project.Payments.Service
 {
     public interface IPaymentService
     {
-        Task<IEnumerable<Payment>> GetAllAsync();
-        Task<Payment?> GetAsync(Guid guid);
-        Task<Guid?> CreateAsync(Payment payment);
-        Task Update(Payment payment);
+        Task<IEnumerable<Entity.Payment>> GetAllAsync();
+        Task<Entity.Payment?> GetAsync(Guid guid);
+        Task<Guid?> CreateAsync(Entity.Payment payment);
+        Task Update(Entity.Payment payment);
     }
 }

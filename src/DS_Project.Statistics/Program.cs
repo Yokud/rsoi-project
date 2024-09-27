@@ -1,6 +1,4 @@
-using DS_Project.Rentals;
-using DS_Project.Rentals.Repository;
-using DS_Project.Rentals.Service;
+using DS_Project.Statistics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,16 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<RentalsDbContext>(opt =>
+builder.Services.AddDbContext<StatsDbContext>(opt =>
 {
     var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
     var connectionString = config.GetConnectionString("DefaultConnection");
     opt.UseNpgsql(connectionString, opts => opts.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
 });
 
-builder.Services.AddScoped<IRentalsRepository, RentalsRepository>();
-builder.Services.AddScoped<IRentalsService, RentalsService>();
-builder.Services.AddSingleton<LogsProducer>();
+builder.Services.AddSingleton<LogsConsumer>();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddCors();
