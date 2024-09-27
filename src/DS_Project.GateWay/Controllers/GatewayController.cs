@@ -428,10 +428,15 @@ namespace DS_Project.GateWay.Controllers
             }
 
             using var getRequest = new HttpRequestMessage(HttpMethod.Get, $"http://statistics:8030/statistics/get");
-
+            getRequest.Headers.Add("scopeToken", scopeToken);
             try
             {
                 using var getResponse = await _httpClient.SendAsync(getRequest);
+
+                if (getResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    return Unauthorized();
+                else if (getResponse.StatusCode == HttpStatusCode.BadRequest)
+                    return BadRequest("You are not admin!");
 
                 if (!getResponse.IsSuccessStatusCode)
                 {

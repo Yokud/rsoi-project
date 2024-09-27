@@ -1,19 +1,33 @@
 ﻿using DS_Project.Statistics.Entity;
+using DS_Project.Statistics.Middleware;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 
 namespace DS_Project.Statistics.Controllers
 {
     [ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class StatsController(LogsConsumer consumer, StatsDbContext context) : Controller
+    public class StatsController(LogsConsumer consumer, StatsDbContext context, JwtValidator jwtValidator) : Controller
     {
         readonly LogsConsumer _consumer = consumer;
         readonly StatsDbContext _appDbContext = context;
+        readonly JwtValidator _jwtValidator = jwtValidator;
 
         [HttpGet("statistics/get")]
-        public async Task<List<string>> Get()
+        public async Task<IActionResult> Get([FromHeader(Name = "scopeToken"), Required] string scopeToken)
         {
+            if (string.IsNullOrWhiteSpace(scopeToken))
+                return Unauthorized();
+
+            var user = _jwtValidator.GetUserDataFromToken(scopeToken);
+            if (user is null)
+                return Unauthorized();
+
+            if (user.Role != "admin")
+                return BadRequest();
+
             var result = new List<string>();
             while (true)
             {
@@ -32,7 +46,8 @@ namespace DS_Project.Statistics.Controllers
                 result.AddRange(moreResults.Select(x => x.Text).ToList());
             }
             _appDbContext.SaveChanges();
-            return result;
+
+            return Ok(result);
         }
     }
 }
