@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-var app = builder.Build();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
@@ -29,7 +28,9 @@ builder.Services.AddCors();
 
 // Configure the HTTP request pipeline.
 
-app.UseHttpLogging();
+var app = builder.Build();
+
+//app.UseHttpLogging();
 
 app.UseCors(builder => builder
                 .AllowAnyOrigin()

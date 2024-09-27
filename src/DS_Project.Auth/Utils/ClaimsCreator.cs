@@ -11,7 +11,7 @@ namespace DS_Project.Auth.Utils
             {
                 new(nameof(IdentifiedUser.Id), user.Id.ToString()),
                 new(nameof(IdentifiedUser.UserName), user.UserName),
-                new(nameof(IdentifiedUser.Role), user.Role.GetRoleNameString()),
+                new(nameof(IdentifiedUser.Role), user.Role),
                 new(nameof(IdentifiedUser.SessionKey), user.SessionKey.ToString())
             };
 
@@ -29,7 +29,7 @@ namespace DS_Project.Auth.Utils
             if (!Guid.TryParse(claims.First(c => c.Type == nameof(IdentifiedUser.SessionKey)).Value, out Guid sessionKey))
                 return null;
 
-            return new IdentifiedUser() { Id = userId, UserName = userName, Role = UserRoleExtension.GetRoleNameFromString(role), SessionKey = sessionKey };
+            return new IdentifiedUser() { Id = userId, UserName = userName, Role = role, SessionKey = sessionKey };
         }
     }
 }

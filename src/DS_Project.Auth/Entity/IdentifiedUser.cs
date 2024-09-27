@@ -6,7 +6,7 @@
 
         public string UserName { get; set; }
 
-        public UserRole Role { get; set; }
+        public string Role { get; set; }
 
         public Guid SessionKey { get; set; }
     }

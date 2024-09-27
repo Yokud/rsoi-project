@@ -3,6 +3,7 @@ using DS_Project.Auth.DTO;
 using DS_Project.Auth.Entity;
 using DS_Project.Auth.Repository;
 using DS_Project.Auth.Utils;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,14 +16,14 @@ namespace DS_Project.Auth.Service
         IUsersRepository _usersRepository;
         UserSessionKeysStorage _sessionKeysStorage;
         JwtConfiguration _jwtConfiguration;
-        ILogger<IUsersService> _logger;
+        //ILogger<IUsersService> _logger;
 
-        public UsersService(IUsersRepository usersRepository, UserSessionKeysStorage sessionKeysStorage, JwtConfiguration jwtConfiguration, ILogger<IUsersService> logger)
+        public UsersService(IUsersRepository usersRepository, IOptions<JwtConfiguration> jwtConfiguration)
         {
             _usersRepository = usersRepository;
-            _sessionKeysStorage = sessionKeysStorage;
-            _jwtConfiguration = jwtConfiguration;
-            _logger = logger;
+            _sessionKeysStorage = new UserSessionKeysStorage();
+            _jwtConfiguration = jwtConfiguration.Value;
+            //_logger = logger;
         }
 
         public async Task<string> Login(UserLoginRequest loginRequest)
@@ -34,7 +35,7 @@ namespace DS_Project.Auth.Service
 
             var sessionKey = _sessionKeysStorage.GenerateNewSessionKey(user.Id);
 
-            var claimsIdentity = ClaimsCreator.CreateClaimsIdentity(new IdentifiedUser() { Id = user.Id, UserName = user.UserName, Role = UserRoleExtension.GetRoleNameFromString(user.Role), SessionKey = sessionKey });
+            var claimsIdentity = ClaimsCreator.CreateClaimsIdentity(new IdentifiedUser() { Id = user.Id, UserName = user.UserName, Role = user.Role, SessionKey = sessionKey });
 
             var token = CreateJwtToken(claimsIdentity);
 
@@ -68,7 +69,7 @@ namespace DS_Project.Auth.Service
 
             if (_jwtConfiguration.SecurityKey == null)
             {
-                _logger.LogCritical("JwtConfiguration not loaded in {service}.", nameof(UsersService));
+                //_logger.LogCritical("JwtConfiguration not loaded in {service}.", nameof(UsersService));
 
                 throw new ArgumentNullException(nameof(_jwtConfiguration), "Security key is null!");
             }

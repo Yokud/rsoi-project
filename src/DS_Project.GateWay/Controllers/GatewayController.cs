@@ -1,4 +1,5 @@
-﻿using DS_Project.GateWay.DTO;
+﻿using DS_Project.Gateway;
+using DS_Project.GateWay.DTO;
 using DS_Project.GateWay.Services;
 using DS_Project.GateWay.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -336,6 +337,36 @@ namespace DS_Project.GateWay.Controllers
             }
 
             return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginRequest loginRequest)
+        {
+            var authServiceHealth = await HealthCheckAsync("auth:8040");
+
+            if (!authServiceHealth)
+            {
+                var resp = new ErrorResponse()
+                {
+                    Message = "Auth Service unavailable",
+                };
+                Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                return new ObjectResult(resp);
+            }
+
+            var loginReq = new HttpRequestMessage(HttpMethod.Post, "http://auth:8040/login")
+            {
+                Content = JsonContent.Create(loginRequest)
+            };
+
+            var tokenResp = await _httpClient.SendAsync(loginReq);
+
+            if (!tokenResp.IsSuccessStatusCode)
+                return NotFound();
+
+            var token = await tokenResp.Content.ReadFromJsonAsync<JwtToken>();
+
+            return Ok(token);
         }
 
         async Task<bool> HealthCheckAsync(string base_adress)
