@@ -49,7 +49,7 @@ namespace DS_Project.Auth.Service
                 Id = newId,
                 UserName = userCreateRequest.UserName,
                 Password = userCreateRequest.Password,
-                Role = userCreateRequest.Role.GetRoleNameString(),
+                Role = UserRole.User.GetRoleNameString(),
                 Email = userCreateRequest.Email,
                 FirstName = userCreateRequest.FirstName,
                 LastName = userCreateRequest.LastName,

@@ -1,6 +1,4 @@
-﻿using DS_Project.Auth.Entity;
-
-namespace DS_Project.Auth.DTO
+﻿namespace DS_Project.Auth.DTO
 {
     public class UserCreateRequest
     {
@@ -13,8 +11,6 @@ namespace DS_Project.Auth.DTO
         public string Email { get; set; }
 
         public string PhoneNumber { get; set; }
-
-        public UserRole Role { get; set; }
 
         public string Password { get; set; }
     }
